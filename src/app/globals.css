@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-background text-white antialiased;
+    background-image:
+      radial-gradient(circle at 15% 0%, rgba(99, 102, 241, 0.18), transparent 45%),
+      radial-gradient(circle at 85% 20%, rgba(34, 211, 238, 0.12), transparent 40%);
+    background-attachment: fixed;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply rounded-xl2 border border-border bg-white/[0.03] backdrop-blur-xl;
+  }
+
+  .glow-button {
+    @apply rounded-full bg-gradient-to-r from-indigo to-cyan px-6 py-3 font-semibold text-background
+      shadow-glow transition-transform duration-200 hover:scale-[1.02] active:scale-[0.98];
+  }
+
+  .badge-promoted {
+    @apply inline-flex items-center gap-1 rounded-full border border-cyan/40 bg-cyan/10 px-2.5 py-1
+      text-xs font-medium text-cyan-glow backdrop-blur-xs;
+  }
+}
