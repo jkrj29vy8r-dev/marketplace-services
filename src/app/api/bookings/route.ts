@@ -3,6 +3,7 @@ import { ZodError } from "zod";
 import { db } from "@/lib/db";
 import { getCurrentSession } from "@/lib/session";
 import { createBookingSchema } from "@/lib/validation/schemas";
+import { sendBookingConfirmationEmail, sendNewBookingVendorEmail } from "@/lib/email";
 
 export async function GET() {
   const session = await getCurrentSession();
@@ -28,7 +29,10 @@ export async function POST(request: Request) {
   try {
     const data = createBookingSchema.parse(await request.json());
 
-    const service = await db.service.findUnique({ where: { id: data.serviceId } });
+    const service = await db.service.findUnique({
+      where: { id: data.serviceId },
+      include: { vendor: { include: { user: true } } },
+    });
     if (!service || !service.active) {
       return NextResponse.json({ error: "Serviciu indisponibil" }, { status: 404 });
     }
@@ -81,6 +85,26 @@ export async function POST(request: Request) {
 
       return newBooking;
     });
+
+    if (session.user.email) {
+      await sendBookingConfirmationEmail({
+        to: session.user.email,
+        customerName: session.user.name ?? "Client",
+        serviceName: service.title,
+        vendorName: service.vendor.displayName,
+        slotStart: booking.slotStart,
+        totalPriceRON: booking.totalPriceRON,
+      });
+    }
+    if (service.vendor.user.email) {
+      await sendNewBookingVendorEmail({
+        to: service.vendor.user.email,
+        vendorName: service.vendor.displayName,
+        serviceName: service.title,
+        customerName: session.user.name ?? "Client",
+        slotStart: booking.slotStart,
+      });
+    }
 
     return NextResponse.json({ booking }, { status: 201 });
   } catch (error) {

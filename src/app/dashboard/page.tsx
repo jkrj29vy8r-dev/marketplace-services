@@ -6,6 +6,7 @@ import { getCurrentSession } from "@/lib/session";
 import { formatRON } from "@/lib/utils";
 import { PROMOTION_PLAN_PRICES_RON } from "@/lib/constants/brand";
 import { PromoteButton } from "./promote-button";
+import { GalleryUploader } from "./gallery-uploader";
 
 export default async function DashboardPage() {
   const session = await getCurrentSession();
@@ -47,6 +48,15 @@ export default async function DashboardPage() {
                     <PromoteButton key={plan} plan={plan} price={price} />
                   ))}
                 </div>
+              </div>
+
+              <h2 className="mt-8 text-lg font-semibold text-white/80">Galerie foto</h2>
+              <div className="glass-panel mt-4 p-6">
+                <GalleryUploader
+                  displayName={vendorProfile.displayName}
+                  bio={vendorProfile.bio}
+                  galleryUrls={vendorProfile.galleryUrls}
+                />
               </div>
 
               <h2 className="mt-8 text-lg font-semibold text-white/80">Serviciile mele</h2>

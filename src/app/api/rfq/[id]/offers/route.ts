@@ -3,6 +3,7 @@ import { ZodError } from "zod";
 import { db } from "@/lib/db";
 import { getCurrentSession } from "@/lib/session";
 import { createRFQOfferSchema } from "@/lib/validation/schemas";
+import { sendRFQOfferEmail } from "@/lib/email";
 
 export async function POST(request: Request, { params }: { params: { id: string } }) {
   const session = await getCurrentSession();
@@ -19,7 +20,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
     return NextResponse.json({ error: "Profil de prestator inexistent" }, { status: 404 });
   }
 
-  const rfq = await db.rFQ.findUnique({ where: { id: params.id } });
+  const rfq = await db.rFQ.findUnique({ where: { id: params.id }, include: { company: true } });
 
   if (!rfq || rfq.status !== "OPEN") {
     return NextResponse.json({ error: "Cererea nu mai este deschisă" }, { status: 400 });
@@ -42,6 +43,16 @@ export async function POST(request: Request, { params }: { params: { id: string 
 
       return created;
     });
+
+    if (rfq.company.email) {
+      await sendRFQOfferEmail({
+        to: rfq.company.email,
+        customerName: rfq.company.name ?? "Client",
+        rfqTitle: rfq.title,
+        vendorName: vendorProfile.displayName,
+        priceRON: data.priceRON,
+      });
+    }
 
     return NextResponse.json({ offer }, { status: 201 });
   } catch (error) {
