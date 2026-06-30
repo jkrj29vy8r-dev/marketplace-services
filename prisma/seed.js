@@ -4,26 +4,17 @@ const bcrypt = require("bcryptjs");
 const prisma = new PrismaClient();
 
 const CATEGORIES = [
-  {
-    name: "Entertainment & Evenimente",
-    slug: "entertainment-evenimente",
-    icon: "PartyPopper",
-  },
-  {
-    name: "Auto",
-    slug: "auto",
-    icon: "Car",
-  },
-  {
-    name: "Home & Garden",
-    slug: "home-garden",
-    icon: "Leaf",
-  },
-  {
-    name: "Health & Wellness",
-    slug: "health-wellness",
-    icon: "HeartPulse",
-  },
+  { name: "DJ & Muzică", slug: "dj-muzica", icon: "Music4" },
+  { name: "Dansatori & Artiști", slug: "dansatori-artisti", icon: "Sparkles" },
+  { name: "Organizare Evenimente", slug: "evenimente", icon: "PartyPopper" },
+  { name: "Curățenie", slug: "curatenie", icon: "Scissors" },
+  { name: "Transport & Logistică", slug: "transport-logistica", icon: "Truck" },
+  { name: "Mentenanță & Reparații", slug: "mentenanta", icon: "Wrench" },
+  { name: "Foto & Video", slug: "foto-video", icon: "Camera" },
+  { name: "Grădinărit & Exterior", slug: "gradinarit", icon: "Leaf" },
+  { name: "Auto & Detailing", slug: "auto", icon: "Car" },
+  { name: "Fitness & Nutriție", slug: "fitness-nutritie", icon: "Dumbbell" },
+  { name: "Beauty & Înfrumusețare", slug: "beauty", icon: "Wand2" },
 ];
 
 const DEMO_VENDORS = [
@@ -32,7 +23,7 @@ const DEMO_VENDORS = [
     name: "Andrei Popescu",
     displayName: "DJ Vibe Events",
     bio: "DJ profesionist pentru nunți, botezuri și petreceri corporate. 10 ani experiență.",
-    categorySlug: "entertainment-evenimente",
+    categorySlug: "dj-muzica",
     verifiedBadge: true,
     promoted: true,
     services: [
@@ -50,7 +41,7 @@ const DEMO_VENDORS = [
     name: "Maria Ionescu",
     displayName: "Flame Dance Crew",
     bio: "Trupă de dansatori profesioniști pentru evenimente private și corporate.",
-    categorySlug: "entertainment-evenimente",
+    categorySlug: "dansatori-artisti",
     verifiedBadge: false,
     promoted: false,
     services: [
@@ -86,7 +77,7 @@ const DEMO_VENDORS = [
     name: "Elena Dumitru",
     displayName: "Curățenie Expres",
     bio: "Servicii de curățenie pentru locuințe, birouri și spații comerciale.",
-    categorySlug: "home-garden",
+    categorySlug: "curatenie",
     verifiedBadge: true,
     promoted: false,
     services: [
@@ -104,7 +95,7 @@ const DEMO_VENDORS = [
     name: "Vasile Stan",
     displayName: "GreenCut Grădinărit",
     bio: "Tuns gazon, întreținere spații verzi, toaletare pomi și gard vegetal.",
-    categorySlug: "home-garden",
+    categorySlug: "gradinarit",
     verifiedBadge: false,
     promoted: false,
     services: [
@@ -122,7 +113,7 @@ const DEMO_VENDORS = [
     name: "Cristina Vasile",
     displayName: "FitCoach Cristina",
     bio: "Antrenor personal certificat, programe de fitness și nutriție personalizate.",
-    categorySlug: "health-wellness",
+    categorySlug: "fitness-nutritie",
     verifiedBadge: true,
     promoted: true,
     services: [
@@ -140,7 +131,7 @@ const DEMO_VENDORS = [
     name: "Radu Constantin",
     displayName: "Nutriție Echilibrată",
     bio: "Nutriționist dietetician, planuri alimentare personalizate pentru obiectivele tale.",
-    categorySlug: "health-wellness",
+    categorySlug: "fitness-nutritie",
     verifiedBadge: false,
     promoted: false,
     services: [
@@ -149,6 +140,42 @@ const DEMO_VENDORS = [
         description: "Evaluare completă, plan alimentar personalizat pe 4 săptămâni.",
         pricingType: "FIXED",
         priceNetRON: 200,
+        durationMins: 60,
+      },
+    ],
+  },
+  {
+    email: "glow.beauty@zervio.ro",
+    name: "Alexandra Toma",
+    displayName: "Glow Beauty Studio",
+    bio: "Machiaj profesional, manichiură și styling pentru evenimente speciale.",
+    categorySlug: "beauty",
+    verifiedBadge: true,
+    promoted: false,
+    services: [
+      {
+        title: "Machiaj profesional eveniment",
+        description: "Machiaj de seară/mireasă, produse premium, testare inclusă.",
+        pricingType: "FIXED",
+        priceNetRON: 250,
+        durationMins: 90,
+      },
+    ],
+  },
+  {
+    email: "nailbar.elite@zervio.ro",
+    name: "Diana Stoica",
+    displayName: "Elite Nail Bar",
+    bio: "Manichiură, pedichiură și unghii false, la salon sau la domiciliu.",
+    categorySlug: "beauty",
+    verifiedBadge: false,
+    promoted: false,
+    services: [
+      {
+        title: "Manichiură cu gel",
+        description: "Pilire, modelare, aplicare gel, design la cerere.",
+        pricingType: "FIXED",
+        priceNetRON: 90,
         durationMins: 60,
       },
     ],

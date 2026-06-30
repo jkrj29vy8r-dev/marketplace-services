@@ -9,6 +9,9 @@ import {
   Wrench,
   Camera,
   Leaf,
+  Car,
+  Dumbbell,
+  Wand2,
 } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -22,6 +25,9 @@ const CATEGORIES = [
   { slug: "mentenanta", name: "Mentenanță & Reparații", icon: Wrench },
   { slug: "foto-video", name: "Foto & Video", icon: Camera },
   { slug: "gradinarit", name: "Grădinărit & Exterior", icon: Leaf },
+  { slug: "auto", name: "Auto & Detailing", icon: Car },
+  { slug: "fitness-nutritie", name: "Fitness & Nutriție", icon: Dumbbell },
+  { slug: "beauty", name: "Beauty & Înfrumusețare", icon: Wand2 },
 ];
 
 export function CategoryGrid() {
