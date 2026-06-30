@@ -13,7 +13,7 @@ export const registerCompanySchema = z.object({
   companyName: z.string().min(2).max(150),
   cui: z
     .string()
-    .regex(/^RO?\d{2,10}$/i, "CUI invalid"),
+    .regex(/^(RO)?\d{2,10}$/i, "CUI invalid"),
   regCom: z.string().min(5).max(50),
   sediuSocial: z.string().min(5).max(250),
 });
