@@ -2,13 +2,42 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { ZodError } from "zod";
 import { db } from "@/lib/db";
-import { registerCompanySchema, registerCustomerSchema } from "@/lib/validation/schemas";
+import { registerCompanySchema, registerCustomerSchema, registerVendorSchema } from "@/lib/validation/schemas";
 
 export async function POST(request: Request) {
   const body = await request.json();
-  const accountType = body.accountType as "B2C" | "B2B" | undefined;
+  const accountType = body.accountType as "B2C" | "B2B" | "VENDOR" | undefined;
 
   try {
+    if (accountType === "VENDOR") {
+      const data = registerVendorSchema.parse(body);
+
+      const existing = await db.user.findUnique({ where: { email: data.email } });
+      if (existing) {
+        return NextResponse.json({ error: "Email deja înregistrat" }, { status: 409 });
+      }
+
+      const passwordHash = await bcrypt.hash(data.password, 12);
+
+      const user = await db.user.create({
+        data: {
+          name: data.name,
+          email: data.email,
+          passwordHash,
+          role: "VENDOR",
+          vendorProfile: {
+            create: {
+              displayName: data.displayName,
+              bio: data.bio,
+            },
+          },
+        },
+        select: { id: true, email: true, name: true, role: true },
+      });
+
+      return NextResponse.json({ user }, { status: 201 });
+    }
+
     if (accountType === "B2B") {
       const data = registerCompanySchema.parse(body);
 

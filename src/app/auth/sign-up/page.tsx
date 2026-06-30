@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 
 export default function SignUpPage() {
   const router = useRouter();
-  const [accountType, setAccountType] = useState<"B2C" | "B2B">("B2C");
+  const [accountType, setAccountType] = useState<"B2C" | "B2B" | "VENDOR">("B2C");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -20,10 +20,12 @@ export default function SignUpPage() {
     cui: "",
     regCom: "",
     sediuSocial: "",
+    displayName: "",
+    bio: "",
   });
 
   function update(field: keyof typeof form) {
-    return (event: React.ChangeEvent<HTMLInputElement>) =>
+    return (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
       setForm((prev) => ({ ...prev, [field]: event.target.value }));
   }
 
@@ -61,7 +63,7 @@ export default function SignUpPage() {
         <h1 className="text-2xl font-bold">Creează-ți contul</h1>
 
         <div className="mt-5 flex gap-2 rounded-full border border-border bg-white/5 p-1">
-          {(["B2C", "B2B"] as const).map((type) => (
+          {(["B2C", "B2B", "VENDOR"] as const).map((type) => (
             <button
               key={type}
               onClick={() => setAccountType(type)}
@@ -71,7 +73,7 @@ export default function SignUpPage() {
                 accountType === type ? "bg-gradient-to-r from-indigo to-cyan text-background" : "text-white/60",
               )}
             >
-              {type === "B2C" ? "Persoană fizică" : "Companie"}
+              {type === "B2C" ? "Persoană fizică" : type === "B2B" ? "Companie" : "Prestator"}
             </button>
           ))}
         </div>
@@ -129,6 +131,25 @@ export default function SignUpPage() {
                 placeholder="Sediu social"
                 value={form.sediuSocial}
                 onChange={update("sediuSocial")}
+                className="rounded-xl border border-border bg-white/5 px-4 py-3 text-sm placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-indigo"
+              />
+            </>
+          )}
+
+          {accountType === "VENDOR" && (
+            <>
+              <input
+                required
+                placeholder="Nume afacere / brand prestator"
+                value={form.displayName}
+                onChange={update("displayName")}
+                className="rounded-xl border border-border bg-white/5 px-4 py-3 text-sm placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-indigo"
+              />
+              <textarea
+                placeholder="Descriere scurtă a serviciilor tale (opțional)"
+                value={form.bio}
+                onChange={update("bio")}
+                rows={3}
                 className="rounded-xl border border-border bg-white/5 px-4 py-3 text-sm placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-indigo"
               />
             </>

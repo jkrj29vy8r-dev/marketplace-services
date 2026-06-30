@@ -18,6 +18,14 @@ export const registerCompanySchema = z.object({
   sediuSocial: z.string().min(5).max(250),
 });
 
+export const registerVendorSchema = z.object({
+  name: z.string().min(2).max(100),
+  email: z.string().email(),
+  password: z.string().min(8).max(72),
+  displayName: z.string().min(2).max(150),
+  bio: z.string().max(3000).optional(),
+});
+
 export const createServiceSchema = z.object({
   categoryId: z.string().cuid(),
   title: z.string().min(3).max(150),
