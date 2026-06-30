@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { upload } from "@vercel/blob/client";
 import { X } from "lucide-react";
 
 export function GalleryUploader({
@@ -36,20 +37,16 @@ export function GalleryUploader({
     setUploading(true);
 
     try {
-      const formData = new FormData();
-      formData.append("file", file);
+      const blob = await upload(file.name, file, {
+        access: "public",
+        handleUploadUrl: "/api/uploads",
+      });
 
-      const res = await fetch("/api/uploads", { method: "POST", body: formData });
-      const data = await res.json();
-
-      if (!res.ok) {
-        setError(data.error ?? "Eroare la upload");
-        return;
-      }
-
-      const nextUrls = [...urls, data.url];
+      const nextUrls = [...urls, blob.url];
       setUrls(nextUrls);
       await persist(nextUrls);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Eroare la upload");
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
