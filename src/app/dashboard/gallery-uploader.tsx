@@ -34,20 +34,36 @@ export function GalleryUploader({
     if (!file) return;
 
     setError(null);
+
+    if (file.size > 8 * 1024 * 1024) {
+      setError("Poza e prea mare (max. 8MB)");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
     setUploading(true);
+
+    const timeoutController = new AbortController();
+    const timeoutId = setTimeout(() => timeoutController.abort(), 30000);
 
     try {
       const blob = await upload(file.name, file, {
         access: "public",
         handleUploadUrl: "/api/uploads",
+        abortSignal: timeoutController.signal,
       });
 
       const nextUrls = [...urls, blob.url];
       setUrls(nextUrls);
       await persist(nextUrls);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Eroare la upload");
+      if (err instanceof Error && err.name === "AbortError") {
+        setError("Conexiune prea slabă — încearcă din nou pe WiFi");
+      } else {
+        setError(err instanceof Error ? err.message : "Eroare la upload");
+      }
     } finally {
+      clearTimeout(timeoutId);
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
