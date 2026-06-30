@@ -5,6 +5,29 @@ import { useRouter } from "next/navigation";
 import { upload } from "@vercel/blob/client";
 import { X } from "lucide-react";
 
+const MAX_DIMENSION = 1600;
+
+async function compressImage(file: File): Promise<File> {
+  if (file.type === "image/avif") return file;
+
+  const bitmap = await createImageBitmap(file);
+  const scale = Math.min(1, MAX_DIMENSION / Math.max(bitmap.width, bitmap.height));
+  const width = Math.round(bitmap.width * scale);
+  const height = Math.round(bitmap.height * scale);
+
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return file;
+  ctx.drawImage(bitmap, 0, 0, width, height);
+
+  const blob: Blob | null = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.8));
+  if (!blob) return file;
+
+  return new File([blob], file.name.replace(/\.\w+$/, ".jpg"), { type: "image/jpeg" });
+}
+
 export function GalleryUploader({
   displayName,
   bio,
@@ -47,7 +70,9 @@ export function GalleryUploader({
     const timeoutId = setTimeout(() => timeoutController.abort(), 30000);
 
     try {
-      const blob = await upload(file.name, file, {
+      const compressed = await compressImage(file);
+
+      const blob = await upload(compressed.name, compressed, {
         access: "public",
         handleUploadUrl: "/api/uploads",
         abortSignal: timeoutController.signal,
