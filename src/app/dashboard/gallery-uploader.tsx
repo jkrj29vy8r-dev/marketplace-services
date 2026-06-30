@@ -41,6 +41,7 @@ export function GalleryUploader({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [urls, setUrls] = useState(galleryUrls);
   const [uploading, setUploading] = useState(false);
+  const [stage, setStage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function persist(nextUrls: string[]) {
@@ -70,26 +71,39 @@ export function GalleryUploader({
     const timeoutId = setTimeout(() => timeoutController.abort(), 30000);
 
     try {
+      setStage("Comprim imaginea...");
+      const t0 = performance.now();
       const compressed = await compressImage(file);
+      console.log(`[upload] compress done in ${Math.round(performance.now() - t0)}ms`, {
+        originalSize: file.size,
+        compressedSize: compressed.size,
+        type: compressed.type,
+      });
 
+      setStage("Trimit către storage...");
+      const t1 = performance.now();
       const blob = await upload(compressed.name, compressed, {
         access: "public",
         handleUploadUrl: "/api/uploads",
         abortSignal: timeoutController.signal,
       });
+      console.log(`[upload] blob put done in ${Math.round(performance.now() - t1)}ms`);
 
       const nextUrls = [...urls, blob.url];
       setUrls(nextUrls);
       await persist(nextUrls);
     } catch (err) {
-      if (err instanceof Error && err.name === "AbortError") {
+      console.error("[upload] failed", err);
+      const message = err instanceof Error ? err.message : String(err);
+      if (err instanceof Error && (err.name === "AbortError" || /abort/i.test(message))) {
         setError("Conexiune prea slabă — încearcă din nou pe WiFi");
       } else {
-        setError(err instanceof Error ? err.message : "Eroare la upload");
+        setError(message || "Eroare la upload");
       }
     } finally {
       clearTimeout(timeoutId);
       setUploading(false);
+      setStage(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
   }
@@ -116,7 +130,7 @@ export function GalleryUploader({
         ))}
 
         <label className="flex h-24 w-24 cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-border text-xs text-white/50 transition hover:border-cyan/40 hover:text-cyan-glow">
-          {uploading ? "Se încarcă..." : "+ Adaugă"}
+          {uploading ? stage ?? "Se încarcă..." : "+ Adaugă"}
           <input
             ref={fileInputRef}
             type="file"
