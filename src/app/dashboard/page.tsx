@@ -352,6 +352,20 @@ export default async function DashboardPage() {
           </Link>
         </div>
 
+        {/* Payments shortcut */}
+        <div className="mt-4 glass-panel flex items-center justify-between p-5">
+          <div className="flex items-center gap-3">
+            <Receipt className="h-5 w-5 text-white/40" />
+            <div>
+              <p className="font-medium">Istoricul plăților</p>
+              <p className="text-sm text-white/40">Tranzacții și facturi</p>
+            </div>
+          </div>
+          <Link href="/dashboard/payments" className="rounded-lg border border-white/10 px-3 py-1.5 text-sm text-white/60 hover:border-white/30 hover:text-white">
+            Vezi →
+          </Link>
+        </div>
+
         {/* Profile link */}
         <div className="mt-4 glass-panel flex items-center justify-between p-5">
           <div>

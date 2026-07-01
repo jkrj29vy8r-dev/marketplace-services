@@ -256,6 +256,7 @@ model Booking {
   status         BookingStatus @default(PENDING)
   totalPriceRON  Float
   paymentType    PaymentType
+  reminderSentAt DateTime?
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
 

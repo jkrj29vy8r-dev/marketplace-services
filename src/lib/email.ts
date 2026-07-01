@@ -85,6 +85,43 @@ export async function sendBookingCancelledEmail(params: {
   );
 }
 
+export async function sendBookingReminderEmail(params: {
+  to: string;
+  customerName: string;
+  serviceName: string;
+  vendorName: string;
+  slotStart: Date;
+}) {
+  const { to, customerName, serviceName, vendorName, slotStart } = params;
+  await send(
+    to,
+    `Reminder: mâine ai rezervare la ${vendorName}`,
+    `<p>Salut ${customerName},</p>
+     <p>Ți-amintim că mâine ai rezervare pentru <strong>${serviceName}</strong> la <strong>${vendorName}</strong>.</p>
+     <p>Data: <strong>${slotStart.toLocaleString("ro-RO")}</strong></p>
+     <p>Dacă ai nevoie să anulezi sau să reprogramezi, intră în <a href="https://zervio.ro/dashboard">dashboard-ul tău</a>.</p>
+     <p>O zi bună!</p>`
+  );
+}
+
+export async function sendNewMessageEmail(params: {
+  to: string;
+  recipientName: string;
+  senderName: string;
+  preview: string;
+  vendorId: string;
+}) {
+  const { to, recipientName, senderName, preview, vendorId } = params;
+  await send(
+    to,
+    `Mesaj nou de la ${senderName}`,
+    `<p>Salut ${recipientName},</p>
+     <p>Ai primit un mesaj nou de la <strong>${senderName}</strong>:</p>
+     <blockquote style="border-left:3px solid #06b6d4;padding:8px 16px;color:#666;">${preview.slice(0, 200)}${preview.length > 200 ? "..." : ""}</blockquote>
+     <p><a href="https://zervio.ro/messages?vendorId=${vendorId}" style="color:#06b6d4;">Răspunde acum →</a></p>`
+  );
+}
+
 export async function sendRFQOfferDecisionEmail(params: {
   to: string;
   vendorName: string;

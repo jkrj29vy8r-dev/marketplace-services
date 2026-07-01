@@ -46,7 +46,12 @@ export default async function AdminPage() {
     <main className="min-h-screen pb-24">
       <Navbar />
       <section className="mx-auto max-w-6xl px-6 py-12">
-        <h1 className="text-2xl font-bold">Panou Admin</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold">Panou Admin</h1>
+          <Link href="/admin/users" className="rounded-lg border border-white/10 px-3 py-1.5 text-sm text-white/60 hover:border-white/30 hover:text-white transition-colors">
+            Toți utilizatorii →
+          </Link>
+        </div>
 
         {/* Stats */}
         <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
