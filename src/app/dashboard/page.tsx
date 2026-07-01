@@ -156,7 +156,17 @@ export default async function DashboardPage() {
         )}
 
         <div className="mt-8 flex flex-col gap-4">
-          {bookings.length === 0 && <p className="text-white/50">Nicio rezervare încă.</p>}
+          {bookings.length === 0 && (
+            <div className="glass-panel flex flex-col items-center gap-4 py-12 text-center">
+              <p className="text-white/50">Nu ai nicio rezervare încă.</p>
+              <Link
+                href="/services"
+                className="rounded-lg bg-cyan-500 px-6 py-2.5 text-sm font-semibold text-black hover:bg-cyan-400"
+              >
+                Explorează servicii →
+              </Link>
+            </div>
+          )}
           {bookings.map((booking) => (
             <div key={booking.id} className="glass-panel p-5">
               <div className="flex items-center justify-between">

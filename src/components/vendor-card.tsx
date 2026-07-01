@@ -54,9 +54,15 @@ export function VendorCard({ vendor }: { vendor: VendorCardData }) {
         )}
 
         <div className="mt-3 flex items-center gap-1 text-sm text-white/70">
-          <Star className="h-4 w-4 fill-cyan-glow text-cyan-glow" />
-          <span className="font-medium">{vendor.ratingAvg.toFixed(1)}</span>
-          <span className="text-white/40">({vendor.ratingCount})</span>
+          {vendor.ratingCount > 0 ? (
+            <>
+              <Star className="h-4 w-4 fill-cyan-glow text-cyan-glow" />
+              <span className="font-medium">{vendor.ratingAvg.toFixed(1)}</span>
+              <span className="text-white/40">({vendor.ratingCount})</span>
+            </>
+          ) : (
+            <span className="text-white/40">Nou pe platformă</span>
+          )}
         </div>
       </div>
     </Link>

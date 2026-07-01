@@ -12,22 +12,24 @@ import {
   Car,
   Dumbbell,
   Wand2,
+  UtensilsCrossed,
 } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 
 const CATEGORIES = [
+  { slug: "auto", name: "Auto & Detailing", icon: Car },
+  { slug: "fitness-nutritie", name: "Fitness & Nutriție", icon: Dumbbell },
+  { slug: "beauty", name: "Beauty & Înfrumusețare", icon: Wand2 },
+  { slug: "curatenie", name: "Curățenie", icon: Scissors },
   { slug: "dj-muzica", name: "DJ & Muzică", icon: Music4 },
   { slug: "dansatori-artisti", name: "Dansatori & Artiști", icon: Sparkles },
-  { slug: "curatenie", name: "Curățenie", icon: Scissors },
   { slug: "transport-logistica", name: "Transport & Logistică", icon: Truck },
   { slug: "evenimente", name: "Organizare Evenimente", icon: PartyPopper },
   { slug: "mentenanta", name: "Mentenanță & Reparații", icon: Wrench },
   { slug: "foto-video", name: "Foto & Video", icon: Camera },
   { slug: "gradinarit", name: "Grădinărit & Exterior", icon: Leaf },
-  { slug: "auto", name: "Auto & Detailing", icon: Car },
-  { slug: "fitness-nutritie", name: "Fitness & Nutriție", icon: Dumbbell },
-  { slug: "beauty", name: "Beauty & Înfrumusețare", icon: Wand2 },
+  { slug: "catering", name: "Catering & Mâncare", icon: UtensilsCrossed },
 ];
 
 export function CategoryGrid() {

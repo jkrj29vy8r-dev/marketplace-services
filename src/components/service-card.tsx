@@ -65,9 +65,13 @@ export function ServiceCard({
             <p className="text-xs text-white/40">{formatRON(service.priceNetRON)} fără TVA</p>
           )}
         </div>
-        <span className="text-sm text-white/50">
-          ★ {service.vendor.ratingAvg.toFixed(1)} ({service.vendor.ratingCount})
-        </span>
+        {service.vendor.ratingCount > 0 ? (
+          <span className="text-sm text-white/50">
+            ★ {service.vendor.ratingAvg.toFixed(1)} ({service.vendor.ratingCount})
+          </span>
+        ) : (
+          <span className="text-xs text-white/30">Nou</span>
+        )}
       </div>
     </Link>
   );

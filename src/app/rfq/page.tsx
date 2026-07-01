@@ -171,11 +171,25 @@ function RFQPageContent() {
         )}
 
         <div className="mt-8 flex flex-col gap-4">
+          {rfqs.length === 0 && (
+            <p className="text-sm text-white/40">
+              {isB2B ? "Nu ai cereri de ofertă trimise." : "Nicio cerere deschisă momentan."}
+            </p>
+          )}
           {rfqs.map((rfq) => (
             <div key={rfq.id} className="glass-panel p-6">
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold">{rfq.title}</h3>
-                <span className="text-xs uppercase text-white/40">{rfq.status}</span>
+                <div className="flex items-center gap-2">
+                  {rfq.offers.length > 0 && (
+                    <span className="rounded-full bg-cyan-500/20 px-2.5 py-0.5 text-xs font-medium text-cyan-400">
+                      {rfq.offers.length} {rfq.offers.length === 1 ? "ofertă" : "oferte"}
+                    </span>
+                  )}
+                  <span className={`text-xs uppercase ${rfq.status === "OPEN" ? "text-green-400" : "text-white/40"}`}>
+                    {rfq.status}
+                  </span>
+                </div>
               </div>
               <p className="mt-2 text-sm text-white/60">{rfq.description}</p>
               {(rfq.budgetMinRON || rfq.budgetMaxRON) && (
