@@ -4,6 +4,8 @@ import { db } from "@/lib/db";
 import { getCurrentSession } from "@/lib/session";
 import { VerifyVendorButton } from "./verify-vendor-button";
 
+export const metadata = { title: "Admin — Zervio" };
+
 export default async function AdminPage() {
   const session = await getCurrentSession();
   if (!session?.user || session.user.role !== "ADMIN") {

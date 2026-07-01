@@ -8,6 +8,11 @@ import { getCurrentSession } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
+export async function generateMetadata({ params }: { params: { id: string } }) {
+  const vendor = await db.vendorProfile.findUnique({ where: { id: params.id }, select: { displayName: true } });
+  return { title: vendor ? `${vendor.displayName} — Zervio` : "Prestator — Zervio" };
+}
+
 export default async function VendorProfilePage({ params }: { params: { id: string } }) {
   const vendor = await db.vendorProfile.findUnique({
     where: { id: params.id },

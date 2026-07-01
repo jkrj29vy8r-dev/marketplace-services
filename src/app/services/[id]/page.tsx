@@ -9,6 +9,11 @@ import { BookingPanel } from "./booking-panel";
 
 export const dynamic = "force-dynamic";
 
+export async function generateMetadata({ params }: { params: { id: string } }) {
+  const service = await db.service.findUnique({ where: { id: params.id }, select: { title: true } });
+  return { title: service ? `${service.title} — Zervio` : "Serviciu — Zervio" };
+}
+
 export default async function ServiceDetailPage({ params }: { params: { id: string } }) {
   const service = await db.service.findUnique({
     where: { id: params.id },

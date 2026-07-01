@@ -24,9 +24,13 @@ export async function GET() {
       where: { userId: session.user.id },
     });
 
+    if (!vendorProfile) {
+      return NextResponse.json({ error: "Profil prestator inexistent" }, { status: 404 });
+    }
+
     const rfqs = await db.rFQ.findMany({
       where: { status: "OPEN" },
-      include: { offers: { where: { vendorId: vendorProfile?.id ?? "" } }, company: true },
+      include: { offers: { where: { vendorId: vendorProfile.id } }, company: true },
       orderBy: { createdAt: "desc" },
       take: 50,
     });

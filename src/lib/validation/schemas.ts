@@ -49,13 +49,18 @@ export const createBookingSchema = z.object({
   paymentType: z.enum(["CARD", "BANK_TRANSFER"]),
 });
 
-export const createRFQSchema = z.object({
-  title: z.string().min(5).max(150),
-  description: z.string().min(20).max(5000),
-  serviceId: z.string().cuid().optional(),
-  budgetMinRON: z.number().nonnegative().optional(),
-  budgetMaxRON: z.number().positive().optional(),
-});
+export const createRFQSchema = z
+  .object({
+    title: z.string().min(5).max(150),
+    description: z.string().min(20).max(5000),
+    serviceId: z.string().cuid().optional(),
+    budgetMinRON: z.number().nonnegative().optional(),
+    budgetMaxRON: z.number().positive().optional(),
+  })
+  .refine(
+    (d) => d.budgetMinRON === undefined || d.budgetMaxRON === undefined || d.budgetMinRON <= d.budgetMaxRON,
+    { message: "Bugetul minim nu poate fi mai mare decât bugetul maxim", path: ["budgetMinRON"] },
+  );
 
 export const createRFQOfferSchema = z.object({
   priceRON: z.number().positive(),
