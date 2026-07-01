@@ -59,8 +59,19 @@ export default async function DashboardPage() {
                 />
               </div>
 
-              <h2 className="mt-8 text-lg font-semibold text-white/80">Serviciile mele</h2>
+              <div className="mt-8 flex items-center justify-between">
+                <h2 className="text-lg font-semibold text-white/80">Serviciile mele</h2>
+                <Link
+                  href="/dashboard/services/new"
+                  className="rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-black hover:bg-cyan-400"
+                >
+                  + Adaugă serviciu
+                </Link>
+              </div>
               <div className="mt-4 flex flex-col gap-3">
+                {vendorProfile.services.length === 0 && (
+                  <p className="text-sm text-white/40">Niciun serviciu adăugat încă.</p>
+                )}
                 {vendorProfile.services.map((service) => (
                   <div key={service.id} className="glass-panel flex items-center justify-between p-4">
                     <span>{service.title}</span>
