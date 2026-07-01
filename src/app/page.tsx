@@ -7,29 +7,51 @@ import { db } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
-async function getPromotedVendors(): Promise<VendorCardData[]> {
+async function getVendorSections(): Promise<{
+  promoted: VendorCardData[];
+  topRated: VendorCardData[];
+  newest: VendorCardData[];
+}> {
   const now = new Date();
 
-  const vendors = await db.vendorProfile.findMany({
-    where: { promotedUntil: { gt: now } },
-    orderBy: { ratingAvg: "desc" },
-    take: 8,
+  const [promoted, topRated, newest] = await Promise.all([
+    db.vendorProfile.findMany({
+      where: { promotedUntil: { gt: now } },
+      orderBy: { ratingAvg: "desc" },
+      take: 4,
+    }),
+    db.vendorProfile.findMany({
+      where: { ratingCount: { gt: 0 } },
+      orderBy: { ratingAvg: "desc" },
+      take: 4,
+    }),
+    db.vendorProfile.findMany({
+      where: { verifiedBadge: true },
+      orderBy: { createdAt: "desc" },
+      take: 4,
+    }),
+  ]);
+
+  const toCard = (v: typeof promoted[0], isPromoted: boolean): VendorCardData => ({
+    id: v.id,
+    displayName: v.displayName,
+    bio: v.bio,
+    galleryUrls: v.galleryUrls,
+    verifiedBadge: v.verifiedBadge,
+    ratingAvg: v.ratingAvg,
+    ratingCount: v.ratingCount,
+    isPromoted,
   });
 
-  return vendors.map((vendor) => ({
-    id: vendor.id,
-    displayName: vendor.displayName,
-    bio: vendor.bio,
-    galleryUrls: vendor.galleryUrls,
-    verifiedBadge: vendor.verifiedBadge,
-    ratingAvg: vendor.ratingAvg,
-    ratingCount: vendor.ratingCount,
-    isPromoted: true,
-  }));
+  return {
+    promoted: promoted.map((v) => toCard(v, true)),
+    topRated: topRated.map((v) => toCard(v, false)),
+    newest: newest.map((v) => toCard(v, false)),
+  };
 }
 
 export default async function HomePage() {
-  const promotedVendors = await getPromotedVendors();
+  const { promoted: promotedVendors, topRated, newest } = await getVendorSections();
 
   return (
     <main className="min-h-screen">
@@ -64,10 +86,32 @@ export default async function HomePage() {
       </section>
 
       {promotedVendors.length > 0 && (
-        <section className="mx-auto max-w-6xl px-6 pb-24">
-          <h2 className="mb-6 text-lg font-semibold text-white/80">Recomandate</h2>
+        <section className="mx-auto max-w-6xl px-6 pb-12">
+          <h2 className="mb-6 text-lg font-semibold text-white/80">Promovați</h2>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {promotedVendors.map((vendor) => (
+              <VendorCard key={vendor.id} vendor={vendor} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {topRated.length > 0 && (
+        <section className="mx-auto max-w-6xl px-6 pb-12">
+          <h2 className="mb-6 text-lg font-semibold text-white/80">Cele mai bine cotate</h2>
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {topRated.map((vendor) => (
+              <VendorCard key={vendor.id} vendor={vendor} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {newest.length > 0 && (
+        <section className="mx-auto max-w-6xl px-6 pb-24">
+          <h2 className="mb-6 text-lg font-semibold text-white/80">Nou pe platformă</h2>
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {newest.map((vendor) => (
               <VendorCard key={vendor.id} vendor={vendor} />
             ))}
           </div>

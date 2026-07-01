@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export function VerifyVendorButton({ vendorId }: { vendorId: string }) {
   const router = useRouter();
@@ -9,18 +10,23 @@ export function VerifyVendorButton({ vendorId }: { vendorId: string }) {
 
   async function handleVerify() {
     setLoading(true);
-    await fetch(`/api/admin/vendors/${vendorId}/verify`, { method: "PATCH" });
+    const res = await fetch(`/api/admin/vendors/${vendorId}/verify`, { method: "PATCH" });
     setLoading(false);
-    router.refresh();
+    if (res.ok) {
+      toast.success("Prestator verificat cu succes");
+      router.refresh();
+    } else {
+      toast.error("Eroare la verificare");
+    }
   }
 
   return (
     <button
       onClick={handleVerify}
       disabled={loading}
-      className="rounded-full border border-border px-3 py-1.5 text-sm transition hover:border-cyan/40 hover:text-cyan-glow disabled:opacity-50"
+      className="rounded-lg border border-cyan-500/30 px-3 py-1.5 text-xs text-cyan-400 transition hover:border-cyan-400 disabled:opacity-50"
     >
-      {loading ? "Se verifică..." : "Aprobă verificare"}
+      {loading ? "..." : "Verifică"}
     </button>
   );
 }

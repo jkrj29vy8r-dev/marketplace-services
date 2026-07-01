@@ -10,6 +10,10 @@ export default withAuth(
       return NextResponse.redirect(new URL("/", request.url));
     }
 
+    if (path.startsWith("/rfq") && role !== "CUSTOMER_B2B" && role !== "VENDOR") {
+      return NextResponse.redirect(new URL("/auth/sign-in", request.url));
+    }
+
     return NextResponse.next();
   },
   {
@@ -20,5 +24,5 @@ export default withAuth(
 );
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/admin/:path*"],
+  matcher: ["/dashboard/:path*", "/admin/:path*", "/rfq/:path*"],
 };

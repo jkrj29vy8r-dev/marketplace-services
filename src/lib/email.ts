@@ -68,3 +68,36 @@ export async function sendRFQOfferEmail(params: {
      <p>Intră în contul tău Zervio pentru a o vedea.</p>`
   );
 }
+
+export async function sendBookingCancelledEmail(params: {
+  to: string;
+  name: string;
+  serviceName: string;
+  slotStart: Date;
+}) {
+  const { to, name, serviceName, slotStart } = params;
+  await send(
+    to,
+    `Rezervare anulată — ${serviceName}`,
+    `<p>Salut ${name},</p>
+     <p>Rezervarea pentru <strong>${serviceName}</strong> din <strong>${slotStart.toLocaleString("ro-RO")}</strong> a fost anulată.</p>
+     <p>Dacă ai întrebări, contactează-ne la support@zervio.ro.</p>`
+  );
+}
+
+export async function sendRFQOfferDecisionEmail(params: {
+  to: string;
+  vendorName: string;
+  rfqTitle: string;
+  decision: "ACCEPTED" | "REJECTED";
+}) {
+  const { to, vendorName, rfqTitle, decision } = params;
+  const accepted = decision === "ACCEPTED";
+  await send(
+    to,
+    `Oferta ta a fost ${accepted ? "acceptată" : "respinsă"} — ${rfqTitle}`,
+    `<p>Salut ${vendorName},</p>
+     <p>Oferta ta pentru cererea <strong>${rfqTitle}</strong> a fost <strong>${accepted ? "acceptată" : "respinsă"}</strong>.</p>
+     ${accepted ? "<p>Intră în contul Zervio pentru a finaliza comanda.</p>" : ""}`
+  );
+}
