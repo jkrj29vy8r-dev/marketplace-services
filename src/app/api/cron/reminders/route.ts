@@ -18,7 +18,6 @@ export async function GET(request: Request) {
     where: {
       status: { in: ["PENDING", "CONFIRMED"] },
       slotStart: { gte: in24h, lte: in25h },
-      reminderSentAt: null,
     },
     include: {
       customer: { select: { email: true, name: true } },
@@ -35,7 +34,7 @@ export async function GET(request: Request) {
       vendorName: booking.service.vendor.displayName,
       slotStart: booking.slotStart,
     });
-    await db.booking.update({ where: { id: booking.id }, data: { reminderSentAt: now } });
+    await db.booking.update({ where: { id: booking.id }, data: { reminderSentAt: now } }).catch(() => null);
     sent++;
   }
 

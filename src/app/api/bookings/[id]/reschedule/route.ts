@@ -45,7 +45,6 @@ export async function PATCH(request: Request, { params }: { params: { id: string
           slotStart: newSlot.startTime,
           slotEnd: newSlot.endTime,
           status: "PENDING",
-          reminderSentAt: null,
         },
       });
     });
