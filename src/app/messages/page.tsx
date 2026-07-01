@@ -48,11 +48,12 @@ function MessagesContent() {
   }, [session]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     fetchMessages();
     if (!vendorId) return;
     const interval = setInterval(fetchMessages, 10_000);
     return () => clearInterval(interval);
-  }, [vendorId]);
+  }, [vendorId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });

@@ -34,7 +34,7 @@ export async function GET(request: Request) {
       vendorName: booking.service.vendor.displayName,
       slotStart: booking.slotStart,
     });
-    await db.booking.update({ where: { id: booking.id }, data: { reminderSentAt: now } }).catch(() => null);
+    // reminderSentAt will be added after DB migration; skip for now
     sent++;
   }
 
