@@ -66,7 +66,7 @@ export default async function VendorProfilePage({ params }: { params: { id: stri
         {vendor.galleryUrls.length > 1 && (
           <div className="mt-8 grid grid-cols-3 gap-3 sm:grid-cols-5">
             {vendor.galleryUrls.slice(1).map((url) => (
-              <div key={url} className="relative aspect-square overflow-hidden rounded-xl2 bg-surface">
+              <div key={url} className="relative aspect-square overflow-hidden rounded-xl bg-surface">
                 <Image src={url} alt={vendor.displayName} fill className="object-cover" />
               </div>
             ))}

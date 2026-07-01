@@ -22,7 +22,7 @@ export async function POST(request: Request) {
       const user = await db.user.create({
         data: {
           name: data.name,
-          email: data.email,
+          email: data.email.toLowerCase(),
           passwordHash,
           role: "VENDOR",
           vendorProfile: {
@@ -56,7 +56,7 @@ export async function POST(request: Request) {
       const user = await db.user.create({
         data: {
           name: data.name,
-          email: data.email,
+          email: data.email.toLowerCase(),
           passwordHash,
           role: "CUSTOMER_B2B",
           companyProfile: {
@@ -86,7 +86,7 @@ export async function POST(request: Request) {
     const user = await db.user.create({
       data: {
         name: data.name,
-        email: data.email,
+        email: data.email.toLowerCase(),
         passwordHash,
         role: "CUSTOMER_B2C",
       },

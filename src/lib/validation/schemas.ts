@@ -27,7 +27,7 @@ export const registerVendorSchema = z.object({
 });
 
 export const createServiceSchema = z.object({
-  categoryId: z.string().cuid(),
+  categoryId: z.string().min(1),
   title: z.string().min(3).max(150),
   description: z.string().min(10).max(3000),
   pricingType: z.enum(["FIXED", "PER_UNIT"]),

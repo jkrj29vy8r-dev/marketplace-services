@@ -4,15 +4,20 @@ import { db } from "@/lib/db";
 import { getCurrentSession } from "@/lib/session";
 import { createAvailabilitySchema } from "@/lib/validation/schemas";
 
-export async function GET(_request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: { params: { id: string } }) {
   const service = await db.service.findUnique({ where: { id: params.id } });
 
   if (!service) {
     return NextResponse.json({ error: "Serviciu inexistent" }, { status: 404 });
   }
 
+  const showAll = new URL(request.url).searchParams.get("all") === "true";
+
   const slots = await db.availability.findMany({
-    where: { vendorId: service.vendorId, isBooked: false, date: { gte: new Date() } },
+    where: {
+      vendorId: service.vendorId,
+      ...(showAll ? {} : { isBooked: false, date: { gte: new Date() } }),
+    },
     orderBy: [{ date: "asc" }, { startTime: "asc" }],
   });
 

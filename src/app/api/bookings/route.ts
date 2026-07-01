@@ -26,6 +26,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Neautorizat" }, { status: 401 });
   }
 
+  if (session.user.role === "VENDOR" || session.user.role === "ADMIN") {
+    return NextResponse.json({ error: "Prestatorii nu pot face rezervări" }, { status: 403 });
+  }
+
   try {
     const data = createBookingSchema.parse(await request.json());
 
