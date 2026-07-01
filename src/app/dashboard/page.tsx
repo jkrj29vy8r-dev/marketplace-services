@@ -10,7 +10,8 @@ import { GalleryUploader } from "./gallery-uploader";
 import { ReviewButton } from "./review-button";
 import { BookingActionButton } from "./booking-action-button";
 import { ServiceToggleButton } from "./service-toggle-button";
-import { Star, CalendarCheck, TrendingUp, Package } from "lucide-react";
+import { BookingsTabs } from "./bookings-tabs";
+import { Star, CalendarCheck, TrendingUp, Package, Receipt, MessageSquare } from "lucide-react";
 
 export const metadata = { title: "Dashboard — Zervio" };
 
@@ -242,120 +243,126 @@ export default async function DashboardPage() {
   }
 
   /* ── CLIENT (B2C + B2B) ── */
-  const bookings = await db.booking.findMany({
-    where: { customerId: session.user.id },
-    include: { service: { include: { vendor: true } }, review: true },
-    orderBy: { createdAt: "desc" },
-  });
+  const [bookings, reviews, messages] = await Promise.all([
+    db.booking.findMany({
+      where: { customerId: session.user.id },
+      include: { service: { include: { vendor: true } }, review: true },
+      orderBy: { createdAt: "desc" },
+    }),
+    db.review.findMany({
+      where: { booking: { customerId: session.user.id } },
+      include: { vendor: { select: { displayName: true } } },
+      orderBy: { createdAt: "desc" },
+    }),
+    db.message.findMany({
+      where: { senderId: session.user.id },
+      include: { vendor: { select: { displayName: true } } },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+    }),
+  ]);
 
-  const active = bookings.filter((b) => ["PENDING", "CONFIRMED"].includes(b.status));
-  const past = bookings.filter((b) => ["COMPLETED", "CANCELLED"].includes(b.status));
+  const activeCount = bookings.filter((b) => ["PENDING", "CONFIRMED"].includes(b.status)).length;
+  const serializedBookings = bookings.map((b) => ({
+    ...b,
+    slotStart: b.slotStart.toISOString(),
+    slotEnd: b.slotEnd.toISOString(),
+    createdAt: b.createdAt.toISOString(),
+    updatedAt: b.updatedAt.toISOString(),
+  }));
 
   return (
     <main className="min-h-screen pb-24">
       <Navbar />
       <section className="mx-auto max-w-4xl px-6 py-12">
-        <h1 className="text-2xl font-bold">Rezervările mele</h1>
+        <div className="flex items-center gap-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-indigo-glow to-cyan-glow text-lg font-bold text-black">
+            {session.user.name?.charAt(0).toUpperCase() ?? "?"}
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold">Bună, {session.user.name?.split(" ")[0]}!</h1>
+            <p className="text-sm text-white/40">
+              {new Date().toLocaleDateString("ro-RO", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+            </p>
+          </div>
+        </div>
+
+        {/* Stats */}
+        <div className="mt-6 grid grid-cols-3 gap-4">
+          <div className="glass-panel p-4 text-center">
+            <p className="text-2xl font-bold text-cyan-400">{activeCount}</p>
+            <p className="mt-1 text-xs text-white/40">Rezervări active</p>
+          </div>
+          <div className="glass-panel p-4 text-center">
+            <p className="text-2xl font-bold">{bookings.length}</p>
+            <p className="mt-1 text-xs text-white/40">Total rezervări</p>
+          </div>
+          <div className="glass-panel p-4 text-center">
+            <p className="text-2xl font-bold">{reviews.length}</p>
+            <p className="mt-1 text-xs text-white/40">Recenzii lăsate</p>
+          </div>
+        </div>
 
         {session.user.role === "CUSTOMER_B2B" && (
-          <Link href="/rfq" className="mt-3 inline-block text-sm text-cyan-glow hover:underline">
+          <Link href="/rfq" className="mt-4 inline-flex items-center gap-1 text-sm text-cyan-glow hover:underline">
             Gestionează Cererile de Ofertă →
           </Link>
         )}
 
-        {bookings.length === 0 ? (
-          <div className="glass-panel mt-8 flex flex-col items-center gap-4 py-14 text-center">
-            <p className="text-white/50">Nu ai nicio rezervare încă.</p>
-            <Link
-              href="/services"
-              className="rounded-lg bg-cyan-500 px-6 py-2.5 text-sm font-semibold text-black hover:bg-cyan-400"
-            >
-              Explorează servicii →
-            </Link>
-          </div>
-        ) : (
+        {/* Bookings with tabs */}
+        <h2 className="mt-8 flex items-center gap-2 text-lg font-semibold text-white/80">
+          <CalendarCheck className="h-5 w-5" />
+          Rezervările mele
+        </h2>
+        <BookingsTabs bookings={serializedBookings} />
+
+        {/* Reviews */}
+        {reviews.length > 0 && (
           <>
-            {active.length > 0 && (
-              <>
-                <h2 className="mt-8 text-base font-semibold text-white/60">Active</h2>
-                <div className="mt-3 flex flex-col gap-4">
-                  {active.map((booking) => (
-                    <BookingCard key={booking.id} booking={booking} showCancel />
-                  ))}
+            <h2 className="mt-10 flex items-center gap-2 text-lg font-semibold text-white/80">
+              <Star className="h-5 w-5" />
+              Recenziile mele
+            </h2>
+            <div className="mt-4 flex flex-col gap-3">
+              {reviews.map((r) => (
+                <div key={r.id} className="glass-panel p-4">
+                  <div className="flex items-center justify-between">
+                    <p className="font-medium">{r.vendor.displayName}</p>
+                    <span className="text-sm text-cyan-400">{"★".repeat(r.rating)}</span>
+                  </div>
+                  {r.comment && <p className="mt-1 text-sm text-white/50">{r.comment}</p>}
+                  <p className="mt-1 text-xs text-white/30">{new Date(r.createdAt).toLocaleDateString("ro-RO")}</p>
                 </div>
-              </>
-            )}
-            {past.length > 0 && (
-              <>
-                <h2 className="mt-8 text-base font-semibold text-white/60">Istorice</h2>
-                <div className="mt-3 flex flex-col gap-4">
-                  {past.map((booking) => (
-                    <BookingCard key={booking.id} booking={booking} showCancel={false} />
-                  ))}
-                </div>
-              </>
-            )}
+              ))}
+            </div>
           </>
         )}
+
+        {/* Messages shortcut */}
+        <div className="mt-10 glass-panel flex items-center justify-between p-5">
+          <div className="flex items-center gap-3">
+            <MessageSquare className="h-5 w-5 text-white/40" />
+            <div>
+              <p className="font-medium">Mesajele mele</p>
+              <p className="text-sm text-white/40">Conversații cu prestatorii</p>
+            </div>
+          </div>
+          <Link href="/messages" className="rounded-lg border border-white/10 px-3 py-1.5 text-sm text-white/60 hover:border-white/30 hover:text-white">
+            Deschide →
+          </Link>
+        </div>
+
+        {/* Profile link */}
+        <div className="mt-4 glass-panel flex items-center justify-between p-5">
+          <div>
+            <p className="font-medium">Profilul meu</p>
+            <p className="text-sm text-white/40">Editează date personale și parolă</p>
+          </div>
+          <Link href="/dashboard/profile" className="rounded-lg border border-white/10 px-3 py-1.5 text-sm text-white/60 hover:border-white/30 hover:text-white">
+            Editează →
+          </Link>
+        </div>
       </section>
     </main>
-  );
-}
-
-function BookingCard({
-  booking,
-  showCancel,
-}: {
-  booking: {
-    id: string;
-    status: string;
-    slotStart: Date;
-    totalPriceRON: number;
-    service: { title: string; vendor: { displayName: string } };
-    review: { rating: number; comment: string | null } | null;
-  };
-  showCancel: boolean;
-}) {
-  return (
-    <div className="glass-panel p-5">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="font-semibold">{booking.service.title}</p>
-          <p className="text-sm text-white/50">{booking.service.vendor.displayName}</p>
-          <p className="mt-1 text-sm text-white/40">
-            {booking.slotStart.toLocaleString("ro-RO")}
-          </p>
-        </div>
-        <div className="flex flex-col items-end gap-1.5">
-          <p className="font-semibold">{formatRON(booking.totalPriceRON)}</p>
-          <span
-            className={`rounded-full px-2 py-0.5 text-xs font-medium uppercase ${
-              booking.status === "CONFIRMED"
-                ? "bg-green-500/20 text-green-400"
-                : booking.status === "PENDING"
-                  ? "bg-yellow-500/20 text-yellow-300"
-                  : booking.status === "CANCELLED"
-                    ? "bg-red-500/20 text-red-400"
-                    : "bg-white/10 text-white/50"
-            }`}
-          >
-            {booking.status}
-          </span>
-        </div>
-      </div>
-
-      {booking.status === "COMPLETED" && !booking.review && (
-        <div className="mt-4 border-t border-white/10 pt-4">
-          <ReviewButton bookingId={booking.id} />
-        </div>
-      )}
-      {booking.review && (
-        <div className="mt-4 border-t border-white/10 pt-4">
-          <p className="text-sm text-white/40">
-            Ai acordat {booking.review.rating} ⭐{booking.review.comment ? ` — ${booking.review.comment}` : ""}
-          </p>
-        </div>
-      )}
-    </div>
   );
 }

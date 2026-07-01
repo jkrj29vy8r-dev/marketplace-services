@@ -77,7 +77,7 @@ export default async function ServiceDetailPage({ params }: { params: { id: stri
         </div>
 
         <div>
-          <BookingPanel serviceId={service.id} grossPrice={grossPrice} />
+          <BookingPanel serviceId={service.id} grossPrice={grossPrice} durationMins={service.durationMins} />
         </div>
       </section>
     </main>
