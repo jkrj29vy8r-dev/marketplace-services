@@ -10,25 +10,27 @@ export function MobileNav() {
   const { data: session } = useSession();
 
   const links = [
-    { href: "/", label: "Acasă", icon: Home },
-    { href: "/services", label: "Caută", icon: Search },
+    { href: "/", label: "Acasă", icon: Home, match: (p: string) => p === "/" },
+    { href: "/services", label: "Caută", icon: Search, match: (p: string) => p.startsWith("/services") },
     {
       href: session?.user ? "/dashboard" : "/auth/sign-in",
       label: session?.user?.role === "CUSTOMER_B2B" ? "RFQ" : "Rezervări",
       icon: CalendarDays,
+      match: (p: string) => p.startsWith("/dashboard") || p.startsWith("/booking") || p.startsWith("/rfq"),
     },
     {
-      href: session?.user ? "/dashboard" : "/auth/sign-in",
+      href: session?.user ? "/dashboard/profile" : "/auth/sign-in",
       label: "Cont",
       icon: User,
+      match: (p: string) => p.startsWith("/dashboard/profile") || p === "/auth/sign-in" || p === "/auth/sign-up",
     },
   ];
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 bg-background/90 backdrop-blur-xl md:hidden">
       <div className="flex items-center justify-around px-2 py-2">
-        {links.map(({ href, label, icon: Icon }) => {
-          const active = pathname === href || (href !== "/" && pathname.startsWith(href));
+        {links.map(({ href, label, icon: Icon, match }) => {
+          const active = match(pathname);
           return (
             <Link
               key={label}
