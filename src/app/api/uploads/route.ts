@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
-import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
+import { put } from "@vercel/blob";
 import { getCurrentSession } from "@/lib/session";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/avif"];
 const MAX_SIZE_BYTES = 8 * 1024 * 1024;
+
+export const maxDuration = 60;
 
 export async function POST(request: Request) {
   const session = await getCurrentSession();
@@ -11,26 +13,32 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Acces interzis" }, { status: 401 });
   }
 
-  const body = (await request.json()) as HandleUploadBody;
+  const formData = await request.formData();
+  const file = formData.get("file") as File | null;
+
+  if (!file) {
+    return NextResponse.json({ error: "Fișier lipsă" }, { status: 400 });
+  }
+
+  if (!ALLOWED_TYPES.includes(file.type)) {
+    return NextResponse.json({ error: "Tip de fișier nepermis" }, { status: 400 });
+  }
+
+  if (file.size > MAX_SIZE_BYTES) {
+    return NextResponse.json({ error: "Fișier prea mare (max. 8MB)" }, { status: 400 });
+  }
 
   try {
-    const jsonResponse = await handleUpload({
-      body,
-      request,
-      onBeforeGenerateToken: async () => ({
-        allowedContentTypes: ALLOWED_TYPES,
-        maximumSizeInBytes: MAX_SIZE_BYTES,
-        addRandomSuffix: true,
-        tokenPayload: JSON.stringify({ userId: session.user.id }),
-      }),
-      onUploadCompleted: async () => {},
+    const blob = await put(file.name, file, {
+      access: "public",
+      addRandomSuffix: true,
     });
 
-    return NextResponse.json(jsonResponse);
+    return NextResponse.json({ url: blob.url });
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Eroare la upload" },
-      { status: 400 },
+      { status: 500 },
     );
   }
 }

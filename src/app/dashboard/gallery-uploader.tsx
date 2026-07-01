@@ -2,7 +2,6 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { upload } from "@vercel/blob/client";
 import { X } from "lucide-react";
 
 const MAX_DIMENSION = 1600;
@@ -82,14 +81,23 @@ export function GalleryUploader({
 
       setStage("Trimit către storage...");
       const t1 = performance.now();
-      const blob = await upload(compressed.name, compressed, {
-        access: "public",
-        handleUploadUrl: "/api/uploads",
-        abortSignal: timeoutController.signal,
-      });
-      console.log(`[upload] blob put done in ${Math.round(performance.now() - t1)}ms`);
+      const formData = new FormData();
+      formData.append("file", compressed);
 
-      const nextUrls = [...urls, blob.url];
+      const res = await fetch("/api/uploads", {
+        method: "POST",
+        body: formData,
+        signal: timeoutController.signal,
+      });
+      console.log(`[upload] server put done in ${Math.round(performance.now() - t1)}ms`);
+
+      if (!res.ok) {
+        const json = (await res.json()) as { error?: string };
+        throw new Error(json.error ?? "Eroare la upload");
+      }
+
+      const { url } = (await res.json()) as { url: string };
+      const nextUrls = [...urls, url];
       setUrls(nextUrls);
       await persist(nextUrls);
     } catch (err) {
