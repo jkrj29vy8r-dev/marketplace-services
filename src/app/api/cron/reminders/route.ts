@@ -14,6 +14,14 @@ export async function GET(request: Request) {
   const in24h = new Date(now.getTime() + 24 * 60 * 60 * 1000);
   const in25h = new Date(now.getTime() + 25 * 60 * 60 * 1000);
 
+  // 1) Auto-complete confirmed bookings whose slot has ended,
+  //    so customers can leave reviews.
+  const completed = await db.booking.updateMany({
+    where: { status: "CONFIRMED", slotEnd: { lt: now } },
+    data: { status: "COMPLETED" },
+  });
+
+  // 2) Send 24h reminders (runs hourly, so the 1h window catches each booking once)
   const bookings = await db.booking.findMany({
     where: {
       status: { in: ["PENDING", "CONFIRMED"] },
@@ -21,7 +29,7 @@ export async function GET(request: Request) {
     },
     include: {
       customer: { select: { email: true, name: true } },
-      service: { select: { title: true }, include: { vendor: { select: { displayName: true } } } },
+      service: { select: { title: true, vendor: { select: { displayName: true } } } },
     },
   });
 
@@ -34,9 +42,8 @@ export async function GET(request: Request) {
       vendorName: booking.service.vendor.displayName,
       slotStart: booking.slotStart,
     });
-    // reminderSentAt will be added after DB migration; skip for now
     sent++;
   }
 
-  return NextResponse.json({ sent });
+  return NextResponse.json({ sent, completed: completed.count });
 }

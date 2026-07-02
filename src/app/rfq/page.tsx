@@ -100,7 +100,7 @@ function RFQPageContent() {
     refresh();
   }
 
-  async function handleDecision(rfqId: string, offerId: string, action: "ACCEPT" | "REJECT") {
+  async function handleDecision(rfqId: string, offerId: string, action: "ACCEPT" | "REJECT" | "WITHDRAW") {
     await fetch(`/api/rfq/${rfqId}/offers/${offerId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -109,6 +109,21 @@ function RFQPageContent() {
 
     refresh();
   }
+
+  const RFQ_STATUS: Record<string, { label: string; cls: string }> = {
+    OPEN: { label: "Deschisă", cls: "bg-cyan-500/15 text-cyan-400 animate-pulse" },
+    OFFER_RECEIVED: { label: "Oferte primite", cls: "bg-yellow-500/15 text-yellow-400" },
+    ACCEPTED: { label: "Acceptată", cls: "bg-green-500/15 text-green-400" },
+    REJECTED: { label: "Respinsă", cls: "bg-red-500/15 text-red-400" },
+    CLOSED: { label: "Închisă", cls: "bg-white/10 text-white/40" },
+  };
+
+  const OFFER_STATUS: Record<string, { label: string; cls: string }> = {
+    PENDING: { label: "În așteptare", cls: "text-yellow-400" },
+    ACCEPTED: { label: "Acceptată", cls: "text-green-400" },
+    REJECTED: { label: "Respinsă", cls: "text-red-400" },
+    WITHDRAWN: { label: "Retrasă", cls: "text-white/40" },
+  };
 
   if (!session) {
     return (
@@ -130,6 +145,7 @@ function RFQPageContent() {
         {isB2B && (
           <form onSubmit={handleCreate} className="glass-panel mt-6 flex flex-col gap-3 p-6">
             <h2 className="font-semibold text-white/80">Trimite o cerere nouă</h2>
+            <label className="-mb-2 text-sm text-white/60">Titlu cerere</label>
             <input
               required
               placeholder="Titlu (ex: Curățenie hală 2000mp)"
@@ -137,6 +153,7 @@ function RFQPageContent() {
               onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))}
               className="rounded-xl border border-border bg-white/5 px-4 py-3 text-sm placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-indigo"
             />
+            <label className="-mb-2 text-sm text-white/60">Descriere</label>
             <textarea
               required
               placeholder="Descriere detaliată a proiectului"
@@ -145,6 +162,7 @@ function RFQPageContent() {
               rows={4}
               className="rounded-xl border border-border bg-white/5 px-4 py-3 text-sm placeholder:text-white/40 focus:outline-none focus:ring-1 focus:ring-indigo"
             />
+            <label className="-mb-2 text-sm text-white/60">Buget estimat (RON)</label>
             <div className="flex gap-3">
               <input
                 placeholder="Buget minim (RON)"
@@ -186,8 +204,8 @@ function RFQPageContent() {
                       {rfq.offers.length} {rfq.offers.length === 1 ? "ofertă" : "oferte"}
                     </span>
                   )}
-                  <span className={`text-xs uppercase ${rfq.status === "OPEN" ? "text-green-400" : "text-white/40"}`}>
-                    {rfq.status}
+                  <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${RFQ_STATUS[rfq.status]?.cls ?? "text-white/40"}`}>
+                    {RFQ_STATUS[rfq.status]?.label ?? rfq.status}
                   </span>
                 </div>
               </div>
@@ -237,7 +255,9 @@ function RFQPageContent() {
                       <div>
                         <span className="font-medium">{offer.vendor.displayName}</span> —{" "}
                         {formatRON(offer.priceRON)} · {offer.message}
-                        <span className="ml-2 text-xs uppercase text-white/40">{offer.status}</span>
+                        <span className={`ml-2 text-xs font-medium ${OFFER_STATUS[offer.status]?.cls ?? "text-white/40"}`}>
+                          {OFFER_STATUS[offer.status]?.label ?? offer.status}
+                        </span>
                       </div>
                       {isB2B && offer.status === "PENDING" && (
                         <div className="flex gap-2">
@@ -254,6 +274,14 @@ function RFQPageContent() {
                             Respinge
                           </button>
                         </div>
+                      )}
+                      {isVendor && offer.status === "PENDING" && (
+                        <button
+                          onClick={() => handleDecision(rfq.id, offer.id, "WITHDRAW")}
+                          className="rounded-full bg-white/10 px-3 py-1 text-xs text-white/60 hover:text-red-400"
+                        >
+                          Retrage oferta
+                        </button>
                       )}
                     </div>
                   ))}

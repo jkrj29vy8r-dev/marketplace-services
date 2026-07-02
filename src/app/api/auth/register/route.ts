@@ -3,8 +3,14 @@ import bcrypt from "bcryptjs";
 import { ZodError } from "zod";
 import { db } from "@/lib/db";
 import { registerCompanySchema, registerCustomerSchema, registerVendorSchema } from "@/lib/validation/schemas";
+import { sendWelcomeEmail } from "@/lib/email";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
+  if (!rateLimit(`register:${clientIp(request)}`, 10, 15 * 60 * 1000)) {
+    return NextResponse.json({ error: "Prea multe încercări. Reîncearcă în 15 minute." }, { status: 429 });
+  }
+
   const body = await request.json();
   const accountType = body.accountType as "B2C" | "B2B" | "VENDOR" | undefined;
 
@@ -35,6 +41,7 @@ export async function POST(request: Request) {
         select: { id: true, email: true, name: true, role: true },
       });
 
+      sendWelcomeEmail({ to: user.email, name: user.name, role: user.role }).catch(() => null);
       return NextResponse.json({ user }, { status: 201 });
     }
 
@@ -71,6 +78,7 @@ export async function POST(request: Request) {
         select: { id: true, email: true, name: true, role: true },
       });
 
+      sendWelcomeEmail({ to: user.email, name: user.name, role: user.role }).catch(() => null);
       return NextResponse.json({ user }, { status: 201 });
     }
 
@@ -93,6 +101,7 @@ export async function POST(request: Request) {
       select: { id: true, email: true, name: true, role: true },
     });
 
+    sendWelcomeEmail({ to: user.email, name: user.name, role: user.role }).catch(() => null);
     return NextResponse.json({ user }, { status: 201 });
   } catch (error) {
     if (error instanceof ZodError) {

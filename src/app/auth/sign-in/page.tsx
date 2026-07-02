@@ -76,7 +76,13 @@ export default function SignInPage() {
           Continuă cu Google
         </button>
 
-        <p className="mt-6 text-center text-sm text-white/50">
+        <p className="mt-4 text-center text-sm">
+          <Link href="/auth/forgot-password" className="text-white/50 hover:text-cyan-glow hover:underline">
+            Ai uitat parola?
+          </Link>
+        </p>
+
+        <p className="mt-3 text-center text-sm text-white/50">
           Nu ai cont?{" "}
           <Link href="/auth/sign-up" className="text-cyan-glow hover:underline">
             Înregistrează-te

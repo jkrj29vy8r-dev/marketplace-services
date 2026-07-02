@@ -85,6 +85,41 @@ export async function sendBookingCancelledEmail(params: {
   );
 }
 
+export async function sendPasswordResetEmail(params: {
+  to: string;
+  name: string;
+  resetUrl: string;
+}) {
+  const { to, name, resetUrl } = params;
+  await send(
+    to,
+    "Resetare parolă Zervio",
+    `<p>Salut ${name},</p>
+     <p>Ai cerut resetarea parolei contului tău Zervio. Apasă pe linkul de mai jos (valabil 1 oră):</p>
+     <p><a href="${resetUrl}" style="color:#06b6d4;font-weight:bold;">Resetează parola →</a></p>
+     <p>Dacă nu ai cerut tu resetarea, ignoră acest email — parola ta rămâne neschimbată.</p>`
+  );
+}
+
+export async function sendWelcomeEmail(params: {
+  to: string;
+  name: string;
+  role: string;
+}) {
+  const { to, name, role } = params;
+  const isVendor = role === "VENDOR";
+  await send(
+    to,
+    "Bine ai venit pe Zervio!",
+    `<p>Salut ${name},</p>
+     <p>Contul tău Zervio a fost creat cu succes. 🎉</p>
+     ${isVendor
+       ? "<p>Următorii pași: completează-ți profilul, adaugă primul serviciu și setează-ți disponibilitatea din <a href='https://marketplace-services-delta.vercel.app/dashboard' style='color:#06b6d4;'>dashboard</a>.</p>"
+       : "<p>Explorează serviciile disponibile și fă prima rezervare pe <a href='https://marketplace-services-delta.vercel.app/services' style='color:#06b6d4;'>Zervio</a>.</p>"}
+     <p>Mulțumim că ni te-ai alăturat!</p>`
+  );
+}
+
 export async function sendBookingReminderEmail(params: {
   to: string;
   customerName: string;
