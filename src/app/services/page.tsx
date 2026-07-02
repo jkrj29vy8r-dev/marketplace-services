@@ -3,6 +3,7 @@ import { ServiceCard } from "@/components/service-card";
 import { ServicesFilters } from "./services-filters";
 import { db } from "@/lib/db";
 import { getCurrentSession } from "@/lib/session";
+import { ensureCategories } from "@/lib/categories";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Servicii — Zervio" };
@@ -34,6 +35,8 @@ export default async function ServicesPage({ searchParams }: { searchParams: Sea
       default: return [{ vendor: { promotedUntil: "desc" as const } }, { createdAt: "desc" as const }];
     }
   })();
+
+  await ensureCategories();
 
   const [services, categories] = await Promise.all([
     db.service.findMany({

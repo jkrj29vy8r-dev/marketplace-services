@@ -1,20 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/navbar";
 
-const CATEGORIES = [
-  { id: "cat_auto", name: "Auto" },
-  { id: "cat_entertainment", name: "Entertainment & Evenimente" },
-  { id: "cat_health_wellness", name: "Health & Wellness" },
-  { id: "cat_home_garden", name: "Home & Garden" },
-];
+type Category = { id: string; name: string };
 
 export default function NewServicePage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    fetch("/api/categories")
+      .then((r) => r.json())
+      .then((d) => setCategories(d.categories ?? []));
+  }, []);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -68,8 +70,8 @@ export default function NewServicePage() {
               required
               className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-2.5 text-white focus:outline-none focus:ring-1 focus:ring-cyan-500"
             >
-              <option value="">Alege categoria...</option>
-              {CATEGORIES.map((c) => (
+              <option value="">{categories.length === 0 ? "Se încarcă..." : "Alege categoria..."}</option>
+              {categories.map((c) => (
                 <option key={c.id} value={c.id}>{c.name}</option>
               ))}
             </select>
