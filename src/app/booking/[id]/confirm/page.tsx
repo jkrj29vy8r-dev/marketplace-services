@@ -5,11 +5,18 @@ import { Navbar } from "@/components/navbar";
 import { db } from "@/lib/db";
 import { getCurrentSession } from "@/lib/session";
 import { formatRON } from "@/lib/utils";
+import { RetryPaymentButton } from "./retry-payment-button";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Rezervare confirmată — Zervio" };
 
-export default async function BookingConfirmPage({ params }: { params: { id: string } }) {
+export default async function BookingConfirmPage({
+  params,
+  searchParams,
+}: {
+  params: { id: string };
+  searchParams: { paid?: string; cancelled?: string };
+}) {
   const session = await getCurrentSession();
   if (!session?.user) redirect("/auth/sign-in");
 
@@ -24,6 +31,8 @@ export default async function BookingConfirmPage({ params }: { params: { id: str
   if (!booking || booking.customerId !== session.user.id) notFound();
 
   const isBankTransfer = booking.paymentType === "BANK_TRANSFER";
+  const justPaid = searchParams.paid === "1";
+  const paymentCancelled = searchParams.cancelled === "1" && booking.transaction?.status !== "PAID";
 
   return (
     <main className="min-h-screen pb-24">
@@ -34,13 +43,29 @@ export default async function BookingConfirmPage({ params }: { params: { id: str
         </div>
 
         <h1 className="mt-6 text-2xl font-bold">
-          {isBankTransfer ? "Rezervare înregistrată!" : "Rezervare confirmată!"}
+          {justPaid
+            ? "Plată efectuată cu succes!"
+            : isBankTransfer
+              ? "Rezervare înregistrată!"
+              : "Rezervare confirmată!"}
         </h1>
         <p className="mt-2 text-white/50">
-          {isBankTransfer
-            ? "Rezervarea ta a fost înregistrată. Trimite dovada plății pentru confirmare finală."
-            : "Rezervarea ta a fost confirmată. Vei primi un email cu detaliile."}
+          {justPaid
+            ? "Plata cu cardul a fost procesată. Rezervarea ta e confirmată — vei primi un email cu detaliile."
+            : isBankTransfer
+              ? "Rezervarea ta a fost înregistrată. Trimite dovada plății pentru confirmare finală."
+              : "Rezervarea ta a fost confirmată. Vei primi un email cu detaliile."}
         </p>
+
+        {paymentCancelled && (
+          <div className="mt-6 rounded-xl border border-red-500/30 bg-red-500/10 p-4 text-left">
+            <p className="text-sm font-medium text-red-300">Plata a fost anulată.</p>
+            <p className="mt-1 text-sm text-red-300/80">
+              Rezervarea rămâne în așteptare. Poți relua plata din dashboard sau contacta prestatorul.
+            </p>
+            <RetryPaymentButton bookingId={booking.id} />
+          </div>
+        )}
 
         <div className="glass-panel mt-8 p-6 text-left">
           <h2 className="font-semibold text-white/80">Detalii rezervare</h2>

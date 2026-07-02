@@ -88,6 +88,24 @@ export function BookingPanel({
 
     const { booking } = await response.json() as { booking: { id: string } };
     toast.success("Rezervare creată cu succes!");
+
+    // Card payment: send the customer to Stripe Checkout.
+    // If Stripe isn't configured (503) fall back to the confirmation page.
+    if (paymentType === "CARD") {
+      setLoading(true);
+      const checkoutRes = await fetch("/api/payments/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingId: booking.id }),
+      });
+      setLoading(false);
+      if (checkoutRes.ok) {
+        const { url } = await checkoutRes.json() as { url: string };
+        window.location.href = url;
+        return;
+      }
+    }
+
     router.push(`/booking/${booking.id}/confirm`);
   }
 
