@@ -12,7 +12,7 @@ export async function GET(request: Request) {
 
   const now = new Date();
   const in24h = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-  const in25h = new Date(now.getTime() + 25 * 60 * 60 * 1000);
+  const in48h = new Date(now.getTime() + 48 * 60 * 60 * 1000);
 
   // 1) Auto-complete confirmed bookings whose slot has ended,
   //    so customers can leave reviews.
@@ -21,11 +21,11 @@ export async function GET(request: Request) {
     data: { status: "COMPLETED" },
   });
 
-  // 2) Send 24h reminders (runs hourly, so the 1h window catches each booking once)
+  // 2) Send reminders for bookings happening tomorrow (cron runs daily on Hobby plan)
   const bookings = await db.booking.findMany({
     where: {
       status: { in: ["PENDING", "CONFIRMED"] },
-      slotStart: { gte: in24h, lte: in25h },
+      slotStart: { gte: in24h, lte: in48h },
     },
     include: {
       customer: { select: { email: true, name: true } },
