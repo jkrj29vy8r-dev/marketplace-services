@@ -8,6 +8,14 @@
     overflow-x: hidden;
   }
 
+  /* Native select dropdowns: force dark background so options
+     aren't white-on-white on desktop browsers */
+  select,
+  select option {
+    background-color: #0b1220;
+    color: #fff;
+  }
+
   body {
     @apply bg-background text-white antialiased;
     overflow-x: hidden;
